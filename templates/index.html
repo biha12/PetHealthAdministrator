@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🐾 Pet Health Advisor</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px;
+    background: #161b27;
+    border-bottom: 1px solid #2d3748;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-logo { font-size: 1.4rem; font-weight: 700; color: #7ee8a2; }
+  .nav-tabs { display: flex; gap: 8px; }
+  .nav-tab {
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    background: transparent;
+    color: #94a3b8;
+  }
+  .nav-tab.active { background: #7ee8a2; color: #0f1117; }
+  .nav-tab:hover:not(.active) { background: #2d3748; color: #e2e8f0; }
+
+  /* PAGES */
+  .page { display: none; padding: 40px; max-width: 1100px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* SYMPTOM CHECKER */
+  .page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #f8fafc;
+  }
+  .page-sub { color: #64748b; margin-bottom: 28px; font-size: 0.95rem; }
+
+  .symptom-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+  .sym-btn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #2d3748;
+    background: #161b27;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 0.82rem;
+    text-align: center;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .sym-btn:hover { border-color: #7ee8a2; color: #7ee8a2; }
+  .sym-btn.selected {
+    background: #1a3a2a;
+    border-color: #7ee8a2;
+    color: #7ee8a2;
+    font-weight: 600;
+  }
+
+  .selected-bar {
+    background: #161b27;
+    border: 1px solid #2d3748;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 22px;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .selected-bar .placeholder { color: #4a5568; font-size: 0.9rem; }
+  .tag {
+    background: #1a3a2a;
+    border: 1px solid #7ee8a2;
+    color: #7ee8a2;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tag .remove {
+    cursor: pointer;
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+  .tag .remove:hover { opacity: 1; }
+
+  .actions { display: flex; gap: 12px; margin-bottom: 30px; }
+  .btn-predict {
+    padding: 13px 36px;
+    background: linear-gradient(135deg, #7ee8a2, #38d9a9);
+    color: #0f1117;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-predict:hover { opacity: 0.9; }
+  .btn-clear {
+    padding: 13px 24px;
+    background: transparent;
+    color: #64748b;
+    border: 1.5px solid #2d3748;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-clear:hover { border-color: #ef4444; color: #ef4444; }
+
+  /* RESULT CARD */
+  .result-card {
+    display: none;
+    background: #161b27;
+    border-radius: 16px;
+    border: 1px solid #2d3748;
+    overflow: hidden;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+  .result-header {
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #2d3748;
+  }
+  .result-condition { font-size: 1.4rem; font-weight: 700; }
+  .urgency-badge {
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .urgency-urgent { background: #3d1515; color: #f87171; border: 1px solid #f87171; }
+  .urgency-next_morning { background: #1a3a2a; color: #7ee8a2; border: 1px solid #7ee8a2; }
+
+  .result-body { padding: 24px 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .result-section h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 10px; }
+  .result-section p { font-size: 0.92rem; color: #cbd5e1; line-height: 1.6; }
+
+  .confidence-list { list-style: none; }
+  .confidence-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.88rem; }
+  .confidence-bar-wrap { flex: 1; background: #2d3748; border-radius: 6px; height: 6px; }
+  .confidence-bar { height: 6px; border-radius: 6px; background: linear-gradient(90deg, #7ee8a2, #38d9a9); }
+  .confidence-pct { color: #7ee8a2; font-weight: 600; width: 36px; text-align: right; }
+
+  /* TIPS PAGE */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 18px;
+  }
+  .tip-card {
+    background: #161b27;
+    border: 1px solid #2d3748;
+    border-radius: 14px;
+    padding: 22px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .tip-card:hover { border-color: #7ee8a2; transform: translateY(-2px); }
+  .tip-icon { font-size: 2rem; margin-bottom: 12px; }
+  .tip-title { font-size: 1rem; font-weight: 700; color: #f8fafc; margin-bottom: 8px; }
+  .tip-text { font-size: 0.87rem; color: #94a3b8; line-height: 1.6; }
+
+  /* SEARCH */
+  .search-bar {
+    width: 100%;
+    padding: 12px 18px;
+    border-radius: 10px;
+    border: 1.5px solid #2d3748;
+    background: #161b27;
+    color: #e2e8f0;
+    font-size: 0.92rem;
+    margin-bottom: 24px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-bar:focus { border-color: #7ee8a2; }
+  .search-bar::placeholder { color: #4a5568; }
+
+  .loader { text-align: center; padding: 60px; color: #64748b; font-size: 1rem; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #2d3748;
+    border-top-color: #7ee8a2;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 640px) {
+    .page { padding: 20px; }
+    .result-body { grid-template-columns: 1fr; }
+    nav { padding: 14px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">🐾 PetHealth AI</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('checker')">Symptom Checker</button>
+    <button class="nav-tab" onclick="showPage('tips')">Care Tips</button>
+  </div>
+</nav>
+
+<!-- SYMPTOM CHECKER -->
+<div class="page active" id="page-checker">
+  <div class="page-title">Symptom Checker</div>
+  <div class="page-sub">Select all symptoms your pet is showing, then click Predict.</div>
+
+  <div class="selected-bar" id="selectedBar">
+    <span class="placeholder" id="barPlaceholder">No symptoms selected yet...</span>
+  </div>
+
+  <div class="symptom-grid" id="symptomGrid"></div>
+
+  <div class="actions">
+    <button class="btn-predict" onclick="predict()">🔍 Predict Condition</button>
+    <button class="btn-clear" onclick="clearAll()">Clear All</button>
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <div>
+        <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:4px;">Predicted Condition</div>
+        <div class="result-condition" id="conditionName"></div>
+      </div>
+      <div class="urgency-badge" id="urgencyBadge"></div>
+    </div>
+    <div class="result-body">
+      <div class="result-section">
+        <h4>📋 Advice</h4>
+        <p id="adviceText"></p>
+      </div>
+      <div class="result-section">
+        <h4>🏠 Home Care</h4>
+        <p id="homeCareText"></p>
+      </div>
+      <div class="result-section" style="grid-column: 1 / -1;">
+        <h4>📊 Top Predictions</h4>
+        <ul class="confidence-list" id="confidenceList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="loader" id="loader" style="display:none;">
+    <div class="spinner"></div>
+    Analyzing symptoms...
+  </div>
+</div>
+
+<!-- TIPS PAGE -->
+<div class="page" id="page-tips">
+  <div class="page-title">🌿 Pet Care Tips</div>
+  <div class="page-sub">Essential tips to keep your pet healthy and happy every day.</div>
+  <input class="search-bar" type="text" placeholder="Search tips..." oninput="filterTips(this.value)" />
+  <div class="tips-grid" id="tipsGrid">
+    <div class="loader"><div class="spinner"></div>Loading tips...</div>
+  </div>
+</div>
+
+<script>
+  // ── SYMPTOM DATA from Flask ──
+  const ALL_SYMPTOMS = ["behavioral_change","blood_in_stool","blue_gums","coughing","crying_when_touched","dandruff","diarrhea","drooling","dry_gums","ear_discharge","ear_odor","excessive_thirst","eye_discharge","frequent_urination","fur_loss","head_shaking","hiding","lethargy","limping","loss_of_appetite","not_drinking","not_grooming","not_moving","open_mouth_breathing","pale_gums","pot_belly","rapid_breathing","runny_nose","scratching","seizures","skin_redness","sneezing","sunken_eyes","swelling","swollen_lymph_nodes","visible_worms","vomiting","weakness","weight_loss","wheezing","yellow_eyes"];
+  let selected = new Set();
+  let allTips = [];
+
+  // ── BUILD SYMPTOM GRID ──
+  function buildGrid() {
+    const grid = document.getElementById('symptomGrid');
+    grid.innerHTML = '';
+    ALL_SYMPTOMS.forEach(sym => {
+      const btn = document.createElement('div');
+      btn.className = 'sym-btn';
+      btn.textContent = sym.replace(/_/g, ' ');
+      btn.dataset.sym = sym;
+      btn.onclick = () => toggleSymptom(sym, btn);
+      grid.appendChild(btn);
+    });
+  }
+
+  function toggleSymptom(sym, btn) {
+    if (selected.has(sym)) {
+      selected.delete(sym);
+      btn.classList.remove('selected');
+    } else {
+      selected.add(sym);
+      btn.classList.add('selected');
+    }
+    updateBar();
+    hideResult();
+  }
+
+  function updateBar() {
+    const bar = document.getElementById('selectedBar');
+    const ph = document.getElementById('barPlaceholder');
+    const tags = [...selected].map(s => `
+      <span class="tag">
+        ${s.replace(/_/g, ' ')}
+        <span class="remove" onclick="removeTag('${s}')">✕</span>
+      </span>`).join('');
+
+    if (selected.size === 0) {
+      bar.innerHTML = '<span class="placeholder" id="barPlaceholder">No symptoms selected yet...</span>';
+    } else {
+      bar.innerHTML = tags;
+    }
+  }
+
+  function removeTag(sym) {
+    selected.delete(sym);
+    const btn = document.querySelector(`[data-sym="${sym}"]`);
+    if (btn) btn.classList.remove('selected');
+    updateBar();
+    hideResult();
+  }
+
+  function clearAll() {
+    selected.clear();
+    document.querySelectorAll('.sym-btn.selected').forEach(b => b.classList.remove('selected'));
+    updateBar();
+    hideResult();
+  }
+
+  function hideResult() {
+    document.getElementById('resultCard').style.display = 'none';
+  }
+
+  // ── PREDICT ──
+  async function predict() {
+    if (selected.size === 0) {
+      alert('Please select at least one symptom first.');
+      return;
+    }
+
+    document.getElementById('resultCard').style.display = 'none';
+    document.getElementById('loader').style.display = 'block';
+
+    try {
+      const res = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symptoms: [...selected] })
+      });
+
+      const data = await res.json();
+      document.getElementById('loader').style.display = 'none';
+
+      if (data.error) { alert(data.error); return; }
+
+      // Fill result
+      document.getElementById('conditionName').textContent = data.condition;
+      document.getElementById('adviceText').textContent = data.advice;
+      document.getElementById('homeCareText').textContent = data.home_care;
+
+      const badge = document.getElementById('urgencyBadge');
+      badge.className = `urgency-badge urgency-${data.urgency}`;
+      badge.textContent = data.urgency === 'urgent' ? '🚨 Urgent — See Vet Now' : '🌙 Morning Vet Visit OK';
+
+      // Confidence bars
+      const list = document.getElementById('confidenceList');
+      list.innerHTML = data.top3.map(item => `
+        <li class="confidence-item">
+          <span style="flex:1.4;color:#cbd5e1">${item.condition}</span>
+          <div class="confidence-bar-wrap">
+            <div class="confidence-bar" style="width:${item.confidence}%"></div>
+          </div>
+          <span class="confidence-pct">${item.confidence}%</span>
+        </li>`).join('');
+
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    } catch (err) {
+      document.getElementById('loader').style.display = 'none';
+      alert('Connection error. Make sure Flask is running.');
+    }
+  }
+
+  // ── TIPS ──
+  async function loadTips() {
+    const res = await fetch('/tips');
+    allTips = await res.json();
+    renderTips(allTips);
+  }
+
+  function renderTips(tips) {
+    document.getElementById('tipsGrid').innerHTML = tips.map(t => `
+      <div class="tip-card">
+        <div class="tip-icon">${t.icon}</div>
+        <div class="tip-title">${t.title}</div>
+        <div class="tip-text">${t.tip}</div>
+      </div>`).join('');
+  }
+
+  function filterTips(query) {
+    const q = query.toLowerCase();
+    renderTips(allTips.filter(t =>
+      t.title.toLowerCase().includes(q) || t.tip.toLowerCase().includes(q)
+    ));
+  }
+
+  // ── PAGE SWITCHING ──
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(`page-${name}`).classList.add('active');
+    event.target.classList.add('active');
+    if (name === 'tips' && allTips.length === 0) loadTips();
+  }
+
+  // ── INIT ──
+  buildGrid();
+</script>
+</body>
+</html>
