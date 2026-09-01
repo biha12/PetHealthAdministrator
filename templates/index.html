@@ -1,450 +1,493 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>🐾 Pet Health Advisor</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PetHealth AI</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0e0;min-height:100vh;}
+    nav{background:#1a1a2e;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a2a4a;position:sticky;top:0;z-index:100;}
+    .nav-title{font-size:18px;font-weight:700;color:#fff;}
+    .nav-badge{background:#6c63ff22;color:#6c63ff;border:1px solid #6c63ff44;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+    .page{display:none;min-height:calc(100vh - 60px);}
+    .page.active{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+    .container{max-width:700px;width:100%;}
 
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #0f1117;
-    color: #e2e8f0;
-    min-height: 100vh;
-  }
+    /* WELCOME PAGE */
+    .welcome-hero{text-align:center;margin-bottom:48px;}
+    .welcome-hero h1{font-size:48px;font-weight:800;background:linear-gradient(135deg,#6c63ff,#48cae4);-webkit-background-clip:text; background-clip: text;-webkit-text-fill-color:transparent;margin-bottom:12px;}
+    .welcome-hero p{color:#888;font-size:17px;max-width:420px;margin:0 auto 32px;}
+    .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px;}
+    .feature-box{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:14px;padding:20px;text-align:center;}
+    .feature-box .icon{font-size:28px;margin-bottom:8px;}
+    .feature-box h3{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;}
+    .feature-box p{font-size:12px;color:#666;}
 
-  /* NAV */
-  nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 40px;
-    background: #161b27;
-    border-bottom: 1px solid #2d3748;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .nav-logo { font-size: 1.4rem; font-weight: 700; color: #7ee8a2; }
-  .nav-tabs { display: flex; gap: 8px; }
-  .nav-tab {
-    padding: 8px 20px;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 600;
-    transition: all 0.2s;
-    background: transparent;
-    color: #94a3b8;
-  }
-  .nav-tab.active { background: #7ee8a2; color: #0f1117; }
-  .nav-tab:hover:not(.active) { background: #2d3748; color: #e2e8f0; }
+    /* PET INFO PAGE */
+    .page-title{font-size:26px;font-weight:800;color:#fff;margin-bottom:6px;}
+    .page-sub{color:#666;font-size:14px;margin-bottom:32px;}
+    .card{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:16px;padding:28px;margin-bottom:20px;width:100%;}
+    .label{font-size:13px;color:#888;margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+    .pet-selector{display:flex;gap:12px;margin-bottom:0;}
+    .pet-btn{flex:1;padding:18px;border-radius:12px;border:2px solid #2a2a4a;background:transparent;color:#888;font-size:20px;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:6px;}
+    .pet-btn span.label-text{font-size:14px;font-weight:600;}
+    .pet-btn.active{border-color:#6c63ff;background:#6c63ff22;color:#fff;}
+    .pet-btn:hover{border-color:#6c63ff88;}
+    select,input{width:100%;padding:12px 16px;background:#0f0f1a;border:1px solid #2a2a4a;border-radius:10px;color:#fff;font-size:14px;outline:none;transition:border 0.2s;appearance:none;}
+    select:focus,input:focus{border-color:#6c63ff;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .form-group{margin-bottom:0;}
 
-  /* PAGES */
-  .page { display: none; padding: 40px; max-width: 1100px; margin: 0 auto; }
-  .page.active { display: block; }
+    /* BUTTONS */
+    .btn-primary{width:100%;padding:15px;background:linear-gradient(135deg,#6c63ff,#48cae4);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:opacity 0.2s;margin-top:20px;}
+    .btn-primary:hover{opacity:0.88;}
+    .btn-secondary{width:100%;padding:15px;background:transparent;border:1px solid #2a2a4a;border-radius:12px;color:#888;font-size:15px;cursor:pointer;transition:all 0.2s;margin-top:10px;}
+    .btn-secondary:hover{border-color:#48cae4;color:#48cae4;}
+    .btn-row{display:flex;gap:12px;margin-top:20px;}
+    .btn-row .btn-primary{margin-top:0;}
+    .btn-row .btn-secondary{width:auto;padding:15px 24px;margin-top:0;}
 
-  /* SYMPTOM CHECKER */
-  .page-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 6px;
-    color: #f8fafc;
-  }
-  .page-sub { color: #64748b; margin-bottom: 28px; font-size: 0.95rem; }
+    /* SYMPTOMS PAGE */
+    .search-box{position:relative;margin-bottom:16px;}
+    .search-box input{padding-left:40px;}
+    .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#555;font-size:14px;}
+    .symptom-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;max-height:320px;overflow-y:auto;padding-right:4px;}
+    .symptom-grid::-webkit-scrollbar{width:4px;}
+    .symptom-grid::-webkit-scrollbar-track{background:#0f0f1a;}
+    .symptom-grid::-webkit-scrollbar-thumb{background:#2a2a4a;border-radius:4px;}
+    .symptom-chip{padding:10px 14px;border-radius:10px;border:1px solid #2a2a4a;background:#0f0f1a;color:#888;font-size:13px;cursor:pointer;transition:all 0.15s;user-select:none;display:flex;align-items:center;gap:6px;}
+    .symptom-chip.selected{border-color:#6c63ff;background:#6c63ff22;color:#fff;}
+    .symptom-chip:hover{border-color:#6c63ff88;color:#ccc;}
+    .chip-dot{width:7px;height:7px;border-radius:50%;background:#333;transition:background 0.15s;flex-shrink:0;}
+    .symptom-chip.selected .chip-dot{background:#6c63ff;}
+    .selected-count{margin-top:12px;font-size:13px;color:#555;}
+    .selected-count span{color:#6c63ff;font-weight:600;}
 
-  .symptom-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 10px;
-    margin-bottom: 30px;
-  }
-  .sym-btn {
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1.5px solid #2d3748;
-    background: #161b27;
-    color: #94a3b8;
-    cursor: pointer;
-    font-size: 0.82rem;
-    text-align: center;
-    transition: all 0.2s;
-    user-select: none;
-  }
-  .sym-btn:hover { border-color: #7ee8a2; color: #7ee8a2; }
-  .sym-btn.selected {
-    background: #1a3a2a;
-    border-color: #7ee8a2;
-    color: #7ee8a2;
-    font-weight: 600;
-  }
+    /* PET INFO SUMMARY */
+    .pet-summary{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:13px;color:#888;}
+    .pet-summary .pet-icon{font-size:22px;}
+    .pet-summary strong{color:#fff;}
 
-  .selected-bar {
-    background: #161b27;
-    border: 1px solid #2d3748;
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 22px;
-    min-height: 54px;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .selected-bar .placeholder { color: #4a5568; font-size: 0.9rem; }
-  .tag {
-    background: #1a3a2a;
-    border: 1px solid #7ee8a2;
-    color: #7ee8a2;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .tag .remove {
-    cursor: pointer;
-    font-size: 0.9rem;
-    opacity: 0.7;
-  }
-  .tag .remove:hover { opacity: 1; }
+    /* LOADING */
+    .loading{display:none;text-align:center;padding:32px;}
+    .spinner{width:36px;height:36px;border:3px solid #2a2a4a;border-top-color:#6c63ff;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
 
-  .actions { display: flex; gap: 12px; margin-bottom: 30px; }
-  .btn-predict {
-    padding: 13px 36px;
-    background: linear-gradient(135deg, #7ee8a2, #38d9a9);
-    color: #0f1117;
-    border: none;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  .btn-predict:hover { opacity: 0.9; }
-  .btn-clear {
-    padding: 13px 24px;
-    background: transparent;
-    color: #64748b;
-    border: 1.5px solid #2d3748;
-    border-radius: 10px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-clear:hover { border-color: #ef4444; color: #ef4444; }
+    /* RESULT */
+    .urgency-badge{display:inline-block;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:16px;letter-spacing:0.5px;}
+    .badge-urgent{background:#ff4d4d22;color:#ff4d4d;border:1px solid #ff4d4d44;}
+    .badge-morning{background:#ffa50022;color:#ffa500;border:1px solid #ffa50044;}
+    .badge-normal{background:#00c85222;color:#00c852;border:1px solid #00c85244;}
+    .condition-name{font-size:28px;font-weight:800;color:#fff;margin-bottom:8px;}
+    .condition-advice{color:#888;font-size:14px;line-height:1.6;margin-bottom:20px;}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+    .info-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:12px;padding:16px;}
+    .info-box-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+    .info-box-value{font-size:14px;color:#ccc;line-height:1.5;}
+    .top3-title{font-size:13px;color:#555;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;}
+    .top3-item{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+    .top3-name{font-size:13px;color:#ccc;flex:1;}
+    .top3-bar-wrap{flex:2;background:#0f0f1a;border-radius:4px;height:6px;}
+    .top3-bar{height:6px;border-radius:4px;background:linear-gradient(135deg,#6c63ff,#48cae4);transition:width 0.6s ease;}
+    .top3-pct{font-size:12px;color:#6c63ff;font-weight:600;width:38px;text-align:right;}
 
-  /* RESULT CARD */
-  .result-card {
-    display: none;
-    background: #161b27;
-    border-radius: 16px;
-    border: 1px solid #2d3748;
-    overflow: hidden;
-    animation: fadeIn 0.4s ease;
-  }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    /* TIPS */
+    .tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .tip-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:12px;padding:16px;transition:border-color 0.2s;}
+    .tip-box:hover{border-color:#48cae444;}
+    .tip-icon{font-size:22px;margin-bottom:8px;}
+    .tip-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;}
+    .tip-text{font-size:12px;color:#666;line-height:1.5;}
 
-  .result-header {
-    padding: 22px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #2d3748;
-  }
-  .result-condition { font-size: 1.4rem; font-weight: 700; }
-  .urgency-badge {
-    padding: 6px 18px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 700;
-  }
-  .urgency-urgent { background: #3d1515; color: #f87171; border: 1px solid #f87171; }
-  .urgency-next_morning { background: #1a3a2a; color: #7ee8a2; border: 1px solid #7ee8a2; }
+    /* PROGRESS BAR */
+    .progress-bar{display:flex;align-items:center;gap:8px;margin-bottom:32px;}
+    .step-dot{width:10px;height:10px;border-radius:50%;background:#2a2a4a;transition:background 0.3s;}
+    .step-dot.active{background:#6c63ff;}
+    .step-dot.done{background:#48cae4;}
+    .step-line{flex:1;height:2px;background:#2a2a4a;transition:background 0.3s;}
+    .step-line.done{background:#48cae4;}
 
-  .result-body { padding: 24px 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .result-section h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 10px; }
-  .result-section p { font-size: 0.92rem; color: #cbd5e1; line-height: 1.6; }
-
-  .confidence-list { list-style: none; }
-  .confidence-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.88rem; }
-  .confidence-bar-wrap { flex: 1; background: #2d3748; border-radius: 6px; height: 6px; }
-  .confidence-bar { height: 6px; border-radius: 6px; background: linear-gradient(90deg, #7ee8a2, #38d9a9); }
-  .confidence-pct { color: #7ee8a2; font-weight: 600; width: 36px; text-align: right; }
-
-  /* TIPS PAGE */
-  .tips-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-    gap: 18px;
-  }
-  .tip-card {
-    background: #161b27;
-    border: 1px solid #2d3748;
-    border-radius: 14px;
-    padding: 22px;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-  .tip-card:hover { border-color: #7ee8a2; transform: translateY(-2px); }
-  .tip-icon { font-size: 2rem; margin-bottom: 12px; }
-  .tip-title { font-size: 1rem; font-weight: 700; color: #f8fafc; margin-bottom: 8px; }
-  .tip-text { font-size: 0.87rem; color: #94a3b8; line-height: 1.6; }
-
-  /* SEARCH */
-  .search-bar {
-    width: 100%;
-    padding: 12px 18px;
-    border-radius: 10px;
-    border: 1.5px solid #2d3748;
-    background: #161b27;
-    color: #e2e8f0;
-    font-size: 0.92rem;
-    margin-bottom: 24px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .search-bar:focus { border-color: #7ee8a2; }
-  .search-bar::placeholder { color: #4a5568; }
-
-  .loader { text-align: center; padding: 60px; color: #64748b; font-size: 1rem; }
-  .spinner {
-    width: 36px; height: 36px;
-    border: 3px solid #2d3748;
-    border-top-color: #7ee8a2;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 16px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  @media (max-width: 640px) {
-    .page { padding: 20px; }
-    .result-body { grid-template-columns: 1fr; }
-    nav { padding: 14px 20px; }
-  }
-</style>
+    @media(max-width:600px){
+      .welcome-hero h1{font-size:32px;}
+      .feature-grid{grid-template-columns:1fr;}
+      .form-row{grid-template-columns:1fr;}
+      .info-grid{grid-template-columns:1fr;}
+      .tips-grid{grid-template-columns:1fr;}
+      .symptom-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
+    }
+  </style>
 </head>
 <body>
 
 <nav>
-  <div class="nav-logo">🐾 PetHealth AI</div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('checker')">Symptom Checker</button>
-    <button class="nav-tab" onclick="showPage('tips')">Care Tips</button>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="font-size:22px;">🐾</span>
+    <span class="nav-title">PetHealth AI</span>
   </div>
+  <span class="nav-badge">Random Forest ML</span>
 </nav>
 
-<!-- SYMPTOM CHECKER -->
-<div class="page active" id="page-checker">
-  <div class="page-title">Symptom Checker</div>
-  <div class="page-sub">Select all symptoms your pet is showing, then click Predict.</div>
-
-  <div class="selected-bar" id="selectedBar">
-    <span class="placeholder" id="barPlaceholder">No symptoms selected yet...</span>
-  </div>
-
-  <div class="symptom-grid" id="symptomGrid"></div>
-
-  <div class="actions">
-    <button class="btn-predict" onclick="predict()">🔍 Predict Condition</button>
-    <button class="btn-clear" onclick="clearAll()">Clear All</button>
-  </div>
-
-  <div class="result-card" id="resultCard">
-    <div class="result-header">
-      <div>
-        <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:4px;">Predicted Condition</div>
-        <div class="result-condition" id="conditionName"></div>
-      </div>
-      <div class="urgency-badge" id="urgencyBadge"></div>
+<!-- PAGE 1: WELCOME -->
+<div class="page active" id="page-welcome">
+  <div class="container">
+    <div class="welcome-hero">
+      <h1>PetHealth AI</h1>
+      <p>AI-powered pet health assistant. Select symptoms, get instant diagnosis powered by Machine Learning.</p>
+      <button class="btn-primary" style="max-width:260px;margin:0 auto;" onclick="goTo('page-info')">Get Started →</button>
     </div>
-    <div class="result-body">
-      <div class="result-section">
-        <h4>📋 Advice</h4>
-        <p id="adviceText"></p>
+    <div class="feature-grid">
+      <div class="feature-box">
+        <div class="icon">🤖</div>
+        <h3>ML Powered</h3>
+        <p>Random Forest classifier trained on real veterinary data</p>
       </div>
-      <div class="result-section">
-        <h4>🏠 Home Care</h4>
-        <p id="homeCareText"></p>
+      <div class="feature-box">
+        <div class="icon">🐾</div>
+        <h3>Cat & Dog</h3>
+        <p>Separate symptom sets and conditions for each pet type</p>
       </div>
-      <div class="result-section" style="grid-column: 1 / -1;">
-        <h4>📊 Top Predictions</h4>
-        <ul class="confidence-list" id="confidenceList"></ul>
+      <div class="feature-box">
+        <div class="icon">📊</div>
+        <h3>Top 3 Predictions</h3>
+        <p>See confidence scores for top 3 possible conditions</p>
+      </div>
+      <div class="feature-box">
+        <div class="icon">🚨</div>
+        <h3>Urgency Triage</h3>
+        <p>Know instantly if you need an emergency vet visit</p>
       </div>
     </div>
-  </div>
-
-  <div class="loader" id="loader" style="display:none;">
-    <div class="spinner"></div>
-    Analyzing symptoms...
   </div>
 </div>
 
-<!-- TIPS PAGE -->
-<div class="page" id="page-tips">
-  <div class="page-title">🌿 Pet Care Tips</div>
-  <div class="page-sub">Essential tips to keep your pet healthy and happy every day.</div>
-  <input class="search-bar" type="text" placeholder="Search tips..." oninput="filterTips(this.value)" />
-  <div class="tips-grid" id="tipsGrid">
-    <div class="loader"><div class="spinner"></div>Loading tips...</div>
+<!-- PAGE 2: PET INFO -->
+<div class="page" id="page-info">
+  <div class="container">
+    <div class="progress-bar">
+      <div class="step-dot done" id="dot1"></div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-dot active" id="dot2"></div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-dot" id="dot3"></div>
+      <div class="step-line" id="line3"></div>
+      <div class="step-dot" id="dot4"></div>
+    </div>
+    <div class="page-title">Tell us about your pet</div>
+    <div class="page-sub">We'll customize symptoms and conditions based on your pet's profile</div>
+
+    <div class="card">
+      <div class="label">Pet Type</div>
+      <div class="pet-selector">
+        <button class="pet-btn active" id="btn-cat" onclick="selectPetType('Cat')">
+          🐈<span class="label-text">Cat</span>
+        </button>
+        <button class="pet-btn" id="btn-dog" onclick="selectPetType('Dog')">
+          🐕<span class="label-text">Dog</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Breed</div>
+      <select id="breedSelect">
+        <option value="">Select breed...</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="form-row">
+        <div class="form-group">
+          <div class="label">Age (years)</div>
+          <input type="number" id="petAge" placeholder="e.g. 3" min="0" max="30"/>
+        </div>
+        <div class="form-group">
+          <div class="label">Weight (kg)</div>
+          <input type="number" id="petWeight" placeholder="e.g. 4.5" min="0" max="100" step="0.1"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goTo('page-welcome')">← Back</button>
+      <button class="btn-primary" onclick="goToSymptoms()">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3: SYMPTOMS -->
+<div class="page" id="page-symptoms">
+  <div class="container">
+    <div class="progress-bar">
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot active"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <div class="pet-summary" id="petSummary"></div>
+
+    <div class="page-title">Select Symptoms</div>
+    <div class="page-sub">Choose all symptoms your pet is currently showing</div>
+
+    <div class="card">
+      <div class="search-box">
+        <span class="search-icon">🔎</span>
+        <input type="text" id="symptomSearch" placeholder="Search symptoms..." oninput="filterSymptoms()"/>
+      </div>
+      <div class="symptom-grid" id="symptomGrid"></div>
+      <div class="selected-count">Selected: <span id="selectedCount">0</span> symptoms</div>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Analyzing symptoms with ML model...</p>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goTo('page-info')">← Back</button>
+      <button class="btn-secondary" onclick="clearSymptoms()">🗑 Clear All</button>
+      <button class="btn-primary" onclick="predict()">⚡ Predict</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 4: RESULTS -->
+<div class="page" id="page-results">
+  <div class="container">
+    <div class="progress-bar">
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-line done"></div>
+      <div class="step-dot active"></div>
+    </div>
+
+    <div class="pet-summary" id="petSummaryResult"></div>
+
+    <div class="card">
+      <div style="font-size:13px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">Diagnosis Result</div>
+      <span class="urgency-badge" id="urgencyBadge"></span>
+      <div class="condition-name" id="conditionName"></div>
+      <div class="condition-advice" id="conditionAdvice"></div>
+      <div class="info-grid">
+        <div class="info-box">
+          <div class="info-box-label">🏠 Home Care</div>
+          <div class="info-box-value" id="homeCare"></div>
+        </div>
+        <div class="info-box">
+          <div class="info-box-label">⚕️ Vet Recommendation</div>
+          <div class="info-box-value" id="vetRec"></div>
+        </div>
+      </div>
+      <div class="top3-title">Top Possible Conditions</div>
+      <div id="top3Container"></div>
+    </div>
+
+    <div class="card" id="tipsCard" style="display:none;">
+      <div style="font-size:13px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">🌿 Pet Care Tips</div>
+      <div class="tips-grid" id="tipsGrid"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goTo('page-symptoms')">← Back</button>
+      <button class="btn-secondary" onclick="startOver()">🔄 Check Again</button>
+      <button class="btn-primary" style="margin-top:0;" onclick="showTips()">🌿 Pet Care Tips</button>
+    </div>
   </div>
 </div>
 
 <script>
-  // ── SYMPTOM DATA from Flask ──
-  const ALL_SYMPTOMS = ["behavioral_change","blood_in_stool","blue_gums","coughing","crying_when_touched","dandruff","diarrhea","drooling","dry_gums","ear_discharge","ear_odor","excessive_thirst","eye_discharge","frequent_urination","fur_loss","head_shaking","hiding","lethargy","limping","loss_of_appetite","not_drinking","not_grooming","not_moving","open_mouth_breathing","pale_gums","pot_belly","rapid_breathing","runny_nose","scratching","seizures","skin_redness","sneezing","sunken_eyes","swelling","swollen_lymph_nodes","visible_worms","vomiting","weakness","weight_loss","wheezing","yellow_eyes"];
-  let selected = new Set();
-  let allTips = [];
+  // State
+  let petType = "Cat";
+  let selectedSymptoms = new Set();
+  let allSymptoms = [];
+  let petInfo = {};
 
-  // ── BUILD SYMPTOM GRID ──
-  function buildGrid() {
+  // Navigation
+  function goTo(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  // Select pet type and load breeds + symptoms
+  async function selectPetType(type) {
+    petType = type;
+    document.getElementById('btn-cat').classList.toggle('active', type === 'Cat');
+    document.getElementById('btn-dog').classList.toggle('active', type === 'Dog');
+    selectedSymptoms.clear();
+
+    // Load breeds
+    const res = await fetch(`/breeds/${type}`);
+    const breeds = await res.json();
+    const sel = document.getElementById('breedSelect');
+    sel.innerHTML = '<option value="">Select breed...</option>';
+    breeds.forEach(b => sel.innerHTML += `<option value="${b}">${b}</option>`);
+  }
+
+  // Go to symptoms page
+  async function goToSymptoms() {
+    const breed = document.getElementById('breedSelect').value;
+    const age = document.getElementById('petAge').value;
+    const weight = document.getElementById('petWeight').value;
+
+    if (!breed) { alert("Please select a breed."); return; }
+    if (!age)   { alert("Please enter your pet's age."); return; }
+    if (!weight){ alert("Please enter your pet's weight."); return; }
+
+    petInfo = { type: petType, breed, age, weight };
+
+    // Set summary
+    const icon = petType === 'Cat' ? '🐈' : '🐕';
+    const summary = `${icon} <strong>${breed}</strong> &nbsp;|&nbsp; Age: <strong>${age} yrs</strong> &nbsp;|&nbsp; Weight: <strong>${weight} kg</strong>`;
+    document.getElementById('petSummary').innerHTML = `<span class="pet-icon">${icon}</span>${summary}`;
+    document.getElementById('petSummaryResult').innerHTML = `<span class="pet-icon">${icon}</span>${summary}`;
+
+    // Load symptoms for this pet type
+    const res = await fetch(`/symptoms/${petType}`);
+    allSymptoms = await res.json();
+    buildChips(allSymptoms);
+    selectedSymptoms.clear();
+    document.getElementById('selectedCount').textContent = '0';
+    document.getElementById('symptomSearch').value = '';
+
+    goTo('page-symptoms');
+  }
+
+  // Build symptom chips
+  function buildChips(symptoms) {
     const grid = document.getElementById('symptomGrid');
     grid.innerHTML = '';
-    ALL_SYMPTOMS.forEach(sym => {
-      const btn = document.createElement('div');
-      btn.className = 'sym-btn';
-      btn.textContent = sym.replace(/_/g, ' ');
-      btn.dataset.sym = sym;
-      btn.onclick = () => toggleSymptom(sym, btn);
-      grid.appendChild(btn);
+    symptoms.forEach(s => {
+      const chip = document.createElement('div');
+      chip.className = 'symptom-chip' + (selectedSymptoms.has(s) ? ' selected' : '');
+      chip.innerHTML = `<span class="chip-dot"></span>${s.replace(/_/g, ' ')}`;
+      chip.onclick = () => toggleSymptom(s, chip);
+      grid.appendChild(chip);
     });
   }
 
-  function toggleSymptom(sym, btn) {
-    if (selected.has(sym)) {
-      selected.delete(sym);
-      btn.classList.remove('selected');
-    } else {
-      selected.add(sym);
-      btn.classList.add('selected');
-    }
-    updateBar();
-    hideResult();
+  function toggleSymptom(s, chip) {
+    if (selectedSymptoms.has(s)) { selectedSymptoms.delete(s); chip.classList.remove('selected'); }
+    else { selectedSymptoms.add(s); chip.classList.add('selected'); }
+    document.getElementById('selectedCount').textContent = selectedSymptoms.size;
   }
 
-  function updateBar() {
-    const bar = document.getElementById('selectedBar');
-    const ph = document.getElementById('barPlaceholder');
-    const tags = [...selected].map(s => `
-      <span class="tag">
-        ${s.replace(/_/g, ' ')}
-        <span class="remove" onclick="removeTag('${s}')">✕</span>
-      </span>`).join('');
-
-    if (selected.size === 0) {
-      bar.innerHTML = '<span class="placeholder" id="barPlaceholder">No symptoms selected yet...</span>';
-    } else {
-      bar.innerHTML = tags;
-    }
+  function filterSymptoms() {
+    const q = document.getElementById('symptomSearch').value.toLowerCase();
+    const filtered = allSymptoms.filter(s => s.replace(/_/g, ' ').includes(q));
+    buildChips(filtered);
   }
 
-  function removeTag(sym) {
-    selected.delete(sym);
-    const btn = document.querySelector(`[data-sym="${sym}"]`);
-    if (btn) btn.classList.remove('selected');
-    updateBar();
-    hideResult();
-  }
-
-  function clearAll() {
-    selected.clear();
-    document.querySelectorAll('.sym-btn.selected').forEach(b => b.classList.remove('selected'));
-    updateBar();
-    hideResult();
-  }
-
-  function hideResult() {
-    document.getElementById('resultCard').style.display = 'none';
-  }
-
-  // ── PREDICT ──
+  // Predict
   async function predict() {
-    if (selected.size === 0) {
-      alert('Please select at least one symptom first.');
-      return;
-    }
+    if (selectedSymptoms.size === 0) { alert("Please select at least one symptom."); return; }
+    document.getElementById('loading').style.display = 'block';
 
-    document.getElementById('resultCard').style.display = 'none';
-    document.getElementById('loader').style.display = 'block';
+    await new Promise(r => setTimeout(r, 1000));
 
     try {
       const res = await fetch('/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ symptoms: [...selected] })
+        body: JSON.stringify({ pet_type: petType, symptoms: [...selectedSymptoms] })
       });
-
       const data = await res.json();
-      document.getElementById('loader').style.display = 'none';
-
-      if (data.error) { alert(data.error); return; }
-
-      // Fill result
-      document.getElementById('conditionName').textContent = data.condition;
-      document.getElementById('adviceText').textContent = data.advice;
-      document.getElementById('homeCareText').textContent = data.home_care;
-
-      const badge = document.getElementById('urgencyBadge');
-      badge.className = `urgency-badge urgency-${data.urgency}`;
-      badge.textContent = data.urgency === 'urgent' ? '🚨 Urgent — See Vet Now' : '🌙 Morning Vet Visit OK';
-
-      // Confidence bars
-      const list = document.getElementById('confidenceList');
-      list.innerHTML = data.top3.map(item => `
-        <li class="confidence-item">
-          <span style="flex:1.4;color:#cbd5e1">${item.condition}</span>
-          <div class="confidence-bar-wrap">
-            <div class="confidence-bar" style="width:${item.confidence}%"></div>
-          </div>
-          <span class="confidence-pct">${item.confidence}%</span>
-        </li>`).join('');
-
-      document.getElementById('resultCard').style.display = 'block';
-      document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-    } catch (err) {
-      document.getElementById('loader').style.display = 'none';
-      alert('Connection error. Make sure Flask is running.');
+      document.getElementById('loading').style.display = 'none';
+      showResult(data);
+      goTo('page-results');
+    } catch(e) {
+      document.getElementById('loading').style.display = 'none';
+      alert("Error connecting to server.");
     }
   }
 
-  // ── TIPS ──
-  async function loadTips() {
-    const res = await fetch('/tips');
-    allTips = await res.json();
-    renderTips(allTips);
+  function showResult(data) {
+    const badge = document.getElementById('urgencyBadge');
+    if (data.urgency === 'urgent') {
+      badge.textContent = '🔴 URGENT — See Vet Immediately';
+      badge.className = 'urgency-badge badge-urgent';
+    } else {
+      badge.textContent = '🟡 Monitor — Vet Visit Recommended';
+      badge.className = 'urgency-badge badge-morning';
+    }
+    document.getElementById('conditionName').textContent = data.condition;
+    document.getElementById('conditionAdvice').textContent = data.advice;
+    document.getElementById('homeCare').textContent = data.home_care;
+    document.getElementById('vetRec').textContent = data.urgency === 'urgent'
+      ? 'Go to emergency vet immediately. Do not delay.'
+      : 'Schedule a vet appointment within 24-48 hours.';
+
+    const top3 = document.getElementById('top3Container');
+    top3.innerHTML = '';
+    data.top3.forEach(item => {
+      top3.innerHTML += `
+        <div class="top3-item">
+          <span class="top3-name">${item.condition}</span>
+          <div class="top3-bar-wrap"><div class="top3-bar" style="width:${item.confidence}%"></div></div>
+          <span class="top3-pct">${item.confidence}%</span>
+        </div>`;
+    });
   }
 
-  function renderTips(tips) {
-    document.getElementById('tipsGrid').innerHTML = tips.map(t => `
-      <div class="tip-card">
+  async function showTips() {
+    const res = await fetch('/tips');
+    const data = await res.json();
+    const grid = document.getElementById('tipsGrid');
+    grid.innerHTML = data.map(t => `
+      <div class="tip-box">
         <div class="tip-icon">${t.icon}</div>
         <div class="tip-title">${t.title}</div>
         <div class="tip-text">${t.tip}</div>
       </div>`).join('');
+    document.getElementById('tipsCard').style.display = 'block';
+    document.getElementById('tipsCard').scrollIntoView({ behavior: 'smooth' });
   }
 
-  function filterTips(query) {
-    const q = query.toLowerCase();
-    renderTips(allTips.filter(t =>
-      t.title.toLowerCase().includes(q) || t.tip.toLowerCase().includes(q)
-    ));
-  }
+  function startOver() {
+  // Clear symptoms
+  selectedSymptoms.clear();
 
-  // ── PAGE SWITCHING ──
-  function showPage(name) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(`page-${name}`).classList.add('active');
-    event.target.classList.add('active');
-    if (name === 'tips' && allTips.length === 0) loadTips();
-  }
+  // Clear pet info form
+  document.getElementById('petAge').value = '';
+  document.getElementById('petWeight').value = '';
+  document.getElementById('breedSelect').value = '';
+  document.getElementById('symptomSearch').value = '';
+  document.getElementById('selectedCount').textContent = '0';
 
-  // ── INIT ──
-  buildGrid();
+  // Reset pet type to Cat
+  petType = 'Cat';
+  document.getElementById('btn-cat').classList.add('active');
+  document.getElementById('btn-dog').classList.remove('active');
+  selectPetType('Cat');
+
+  // Hide tips
+  document.getElementById('tipsCard').style.display = 'none';
+
+  goTo('page-welcome');
+}
+function clearSymptoms() {
+  // Clear all selected symptoms
+  selectedSymptoms.clear();
+
+  // Reset search box
+  document.getElementById('symptomSearch').value = '';
+
+  // Reset count
+  document.getElementById('selectedCount').textContent = '0';
+
+  // Rebuild chips with nothing selected
+  buildChips(allSymptoms);
+}
+
+  // Init — load default cat breeds
+  selectPetType('Cat');
 </script>
 </body>
 </html>
