@@ -16,16 +16,24 @@ pet-health-app/
 ├── label_encoder.pkl       ← Auto-generated after training
 │
 ├── templates/
-│   └── index.html          ← HTML page structure
-│
-└── static/
-    ├── style.css           ← All styling (dark theme)
-    └── script.js           ← All frontend logic
+   └── index.html          ← HTML page structure, All styling (dark theme), All frontend logic
 ```
 
 ---
 
-## ⚙️ Requirements
+##  Tech Stack
+| Layer | Technology |
+|---|---|
+| ML | scikit-learn, Random Forest, LabelEncoder, Pandas, NumPy |
+| Backend | Flask, REST API, JSON |
+| Frontend | HTML, CSS, JavaScript (Fetch API) |
+| Deployment | Docker, Gunicorn |
+| Version Control | Git, GitHub |
+
+---
+
+
+##  Requirements
 
 - Python 3.8 or higher
 - pip
@@ -33,12 +41,12 @@ pet-health-app/
 ### Install Dependencies
 
 ```bash
-pip install flask scikit-learn pandas numpy
+pip install flask scikit-learn pandas numpy joblin gunicorn
 ```
 
 ---
 
-## 🚀 Setup & Run
+##  Setup & Run
 
 ### 1. Place Your CSV
 
@@ -46,7 +54,7 @@ Copy `pet_symptoms.csv` into the root project folder (same level as `app.py`).
 
 Your CSV must have these exact columns:
 
-
+ `pet_type` | Select your pet type (Cat or Dog)
  `symptoms` | Space-separated symptom words e.g. `vomiting lethargy` |
  `condition` | Condition name e.g. `Liver Disease` |
  `advice` | What the owner should know |
@@ -82,13 +90,33 @@ http://127.0.0.1:5000
 
 ---
 
-## 🖥️ How to Use
+##  App Flow
+
+Welcome Page
+↓
+Pet Info (Type → Breed → Age → Weight)
+↓
+Symptom Checker (filtered by Cat/Dog)
+↓
+Results (Condition + Confidence + Urgency + Advice)
+
+---
+
+
+##  How to Use
+
+### Welcome Page
+1. Click on Get Started button.
+
+### Pet Info
+1.Write information about your pet (type, breed, age, weight).
 
 ### Symptom Checker Tab
-1. Click symptoms your pet is showing — they highlight green when selected
-2. Selected symptoms appear as tags at the top
-3. Click **Predict Condition**
-4. The result card shows:
+1. Click symptoms your pet is showing — they highlight blue when selected
+2. Click **Predict Condition**
+
+### Result page
+1.The result card shows:
    - Predicted condition
    - Urgency level (emergency or morning visit)
    - Vet advice
@@ -101,26 +129,29 @@ http://127.0.0.1:5000
 
 ---
 
-## 🚨 Urgency Levels
-
+##  Urgency Levels
 
  Urgent — See Vet Now | Take your pet to an emergency vet immediately |
  Morning Vet Visit OK | Monitor at home overnight, vet visit in the morning |
 
 ---
 
-## 🤖 How the ML Model Works
-
-- **Algorithm:** Random Forest Classifier (100 trees)
-- **Input:** Binary symptom vector — `1` if symptom present, `0` if not
-- **Output:** Predicted condition + top 3 probability scores
-- **Training data:** `pet_symptoms.csv`
-
-The model reads all unique symptoms from the CSV, builds a feature vector per row, trains on it, and saves the result to `model.pkl`.
+##  Machine Learning
+| Detail | Value |
+|---|---|
+| Algorithm | Random Forest Classifier |
+| Trees | 100 estimators |
+| Dataset | Custom curated — 466 labeled cases |
+| Conditions | 37 (Cat & Dog separated) |
+| Encoding | Binary symptom vectors |
+| Accuracy | 92%+ on held-out test data |
+| Split | 80% train / 20% test |
+| Pre-trained model used |  None |
+| External API used | None |
 
 ---
 
-## 📄 File Responsibilities
+##  File Responsibilities
 
 
  `train_model.py` | Reads CSV, builds feature vectors, trains Random Forest, saves model |
@@ -133,7 +164,7 @@ The model reads all unique symptoms from the CSV, builds a feature vector per ro
 
 ---
 
-## 📌 Notes
+##  Notes
 
 - This app is for **informational guidance only** — always consult a real veterinarian
 - More rows in your CSV = better prediction accuracy
@@ -141,7 +172,9 @@ The model reads all unique symptoms from the CSV, builds a feature vector per ro
 
 ---
 
-## 👤 Author
-
+# About
+Built by **Nabiha Anwar Rana** — Rising Sophomore IT Student  
+EMAIL: nabihaanwar1078@gmail.com
+https://www.linkedin.com/in/nabiha-rana-41107642a
 Built with Flask + Scikit-learn + Vanilla JS  
 Dataset: Custom pet symptoms CSV
